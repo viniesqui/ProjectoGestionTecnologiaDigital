@@ -45,27 +45,28 @@ class ModelTrainerRegression:
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
             X, y, test_size=0.2, random_state=42)
 
-        self.X_train = self.preprocessor.preprocess_data(self.X_train)
-        self.X_test = self.preprocessor.preprocess_data(self.X_test)
+        # Save the fitted preprocessor
+        dump(self.preprocessor, 'preprocessor.joblib')
+
+        # Load the fitted preprocessor
+        preprocessor = load('preprocessor.joblib')
+
+        self.X_train = preprocessor.preprocess_data(self.X_train)
+        self.X_test = preprocessor.preprocess_data(self.X_test)
 
         pipelines = {
             'lr': Pipeline(steps=[('classifier', LinearRegression())]),
-            'rf': Pipeline(steps=[('classifier', RandomForestRegressor())]),
-            'svr': Pipeline(steps=[('classifier', SVR())]),
+            'rf': Pipeline(steps=[('classifier', RandomForestRegressor())])
         }
 
         param_grids = {
             'lr': {
-                'classifier__normalize': [True, False],
+                # No se usan hyperparametros
             },
             'rf': {
                 'classifier__n_estimators': [10, 50, 100],
                 'classifier__max_depth': [None, 10, 20],
-            },
-            'svr': {
-                'classifier__C': [0.1, 1, 10],
-                'classifier__kernel': ['linear', 'rbf'],
-            },
+            }
         }
 
         best_model = self.train_models(pipelines, param_grids)
