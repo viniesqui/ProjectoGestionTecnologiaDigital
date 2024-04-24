@@ -1,12 +1,12 @@
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.svm import SVR
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import mean_squared_error
 from joblib import dump, load
 from preprocessing import DataPreprocessor
 from sklearn.model_selection import GridSearchCV
+import pandas as pd
 
 class ModelTrainerRegression:
     def __init__(self, data_filepath, target_column, columns_to_remove, columns_to_convert, model_filepath='model.joblib'):
@@ -17,6 +17,15 @@ class ModelTrainerRegression:
         self.columns_to_convert = columns_to_convert
         self.preprocessor = DataPreprocessor(data_filepath, columns_to_remove=self.columns_to_remove, columns_to_convert=self.columns_to_convert)
     
+    def load_data(self):
+        self.df = pd.read_csv(self.data_filepath)
+        self.X = self.df.drop(self.target_column, axis=1)
+        self.y = self.df[self.target_column]
+
+    def split_data(self):
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
+            self.X, self.y, test_size=0.2, random_state=42)
+
     def train_models(self, pipelines, param_grids):
         best_mse = float('inf')
         best_pipeline = None
@@ -38,21 +47,8 @@ class ModelTrainerRegression:
         dump(model, self.model_filepath)
 
     def run(self):
-        df = self.preprocessor.df
-
-        X = df.drop(self.target_column, axis=1)
-        y = df[self.target_column]
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
-            X, y, test_size=0.2, random_state=42)
-
-        # Save the fitted preprocessor
-        dump(self.preprocessor, 'preprocessor.joblib')
-
-        # Load the fitted preprocessor
-        preprocessor = load('preprocessor.joblib')
-
-        self.X_train = preprocessor.preprocess_data(self.X_train)
-        self.X_test = preprocessor.preprocess_data(self.X_test)
+        self.load_data()
+        self.split_data()
 
         pipelines = {
             'lr': Pipeline(steps=[('classifier', LinearRegression())]),
@@ -61,7 +57,7 @@ class ModelTrainerRegression:
 
         param_grids = {
             'lr': {
-                # No se usan hyperparametros
+                # No hyperparameters
             },
             'rf': {
                 'classifier__n_estimators': [10, 50, 100],
@@ -71,7 +67,17 @@ class ModelTrainerRegression:
         }
 
         best_model = self.train_models(pipelines, param_grids)
-        print(X.columns, y.name)
+        print(self.X.columns, self.y.name)
         print(best_model.best_params_)
 
         self.serialize_model(best_model)
+
+if __name__ == "__main__":
+    trainer = ModelTrainerRegression(
+        'preprocessed_data.csv', 
+        'price', 
+        ['Unnamed: 0', 'mark', 'generation_name', 'city', 'province', 'vol_engine'],
+        ['fuel', 'model'], 
+        'model.joblib'
+    )
+    trainer.run()
