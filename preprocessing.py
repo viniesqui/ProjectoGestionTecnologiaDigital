@@ -46,3 +46,35 @@ class DataPreprocessor:
         return preprocessor.fit_transform(data)
     def save_preprocessed_data(self, filepath):
         self.df.to_csv(filepath, index=False)
+        
+        
+class InputPreprocessor:
+    def __init__(self, data, columns_to_convert=[]):
+        self.df = data
+        self.transform_columns_to_numeric(columns_to_convert)
+
+    def transform_columns_to_numeric(self, columns):
+        le = CustomLabelEncoder()
+        for column in columns:
+            self.df[column] = le.fit_transform(self.df[column])
+
+    def preprocess_data(self):
+        numeric_features = self.df.select_dtypes(
+            include=['int64', 'float64']).columns
+        categorical_features = self.df.select_dtypes(include=['object']).columns
+
+        numeric_transformer = Pipeline(steps=[
+            ('scaler', StandardScaler())
+        ])
+
+        categorical_transformer = Pipeline(steps=[
+            ('encoder', OrdinalEncoder())
+        ])
+
+        preprocessor = ColumnTransformer(
+            transformers=[
+                ('num', numeric_transformer, numeric_features),
+                ('cat', categorical_transformer, categorical_features)
+            ])
+
+        return preprocessor.fit_transform(self.df)
