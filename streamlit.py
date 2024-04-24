@@ -11,10 +11,10 @@ def predict_price(model_name, year, milage, fuel):
             'mileage': [milage],
             'fuel': [fuel]}
     df = pd.DataFrame(data)
-
+    print(df, "before")
     preprocessor = InputPreprocessor(df, columns_to_convert=['model', 'fuel'])
     df = preprocessor.preprocess_data()
-    print(df)
+    print(df, "after")
     print(f"Preprocessed data shape: {df.shape}")
     print(f"Model expected input shape: {model.n_features_in_}")
 
