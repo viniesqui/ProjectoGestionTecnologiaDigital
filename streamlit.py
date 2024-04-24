@@ -15,6 +15,8 @@ def predict_price(model_name, year, milage, fuel):
     preprocessor = InputPreprocessor(df, columns_to_convert=['model', 'fuel'])
     df = preprocessor.preprocess_data()
     print(df)
+    print(f"Preprocessed data shape: {df.shape}")
+    print(f"Model expected input shape: {model.n_features_in_}")
 
     # Check number of features
     if df.shape[1] != model.n_features_in_:
@@ -24,8 +26,6 @@ def predict_price(model_name, year, milage, fuel):
     # Make prediction
     prediction = model.predict(df)
     return prediction[0]
-
-
 model_name = st.text_input("Modelo")
 year = st.number_input("Año", min_value=1900, max_value=2022, step=1)
 milage = st.number_input("Millaje", min_value=0, step=1)
