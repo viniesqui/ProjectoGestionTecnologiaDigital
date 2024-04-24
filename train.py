@@ -61,16 +61,16 @@ class ModelTrainerRegression:
 
         param_grids = {
             'lr': {
-                'selector__k': [10, 20, self.X.shape[1]]
+                'selector__k': [1, 2, 3, 4]  # Adjusted k values
             },
             'rf': {
-                'selector__k': [10, 20, self.X.shape[1]],
+                'selector__k': [1, 2, 3, 4],  # Adjusted k values
                 'classifier__n_estimators': [10, 50, 100],
                 'classifier__max_depth': [None, 10, 20],
                 'classifier__min_samples_split': [2, 5, 10]	
             },
             'svr': {
-                'selector__k': [10, 20, self.X.shape[1]],
+                'selector__k': [1, 2, 3, 4],  # Adjusted k values
                 'classifier__C': [0.1, 1, 10],
                 'classifier__gamma': ['scale', 'auto']
             }
