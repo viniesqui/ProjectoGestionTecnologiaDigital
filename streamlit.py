@@ -3,28 +3,27 @@ import streamlit as st
 import pandas as pd
 from preprocessing import InputPreprocessor
 
-model = load('preprocessor.joblib')
+model = load('model.joblib')
 
+def predict_price(model_name, year, milage, fuel):
+    data = {'model': [model_name],
+            'year': [year],
+            'mileage': [milage],
+            'fuel': [fuel]}
+    df = pd.DataFrame(data)
+
+    preprocessor = InputPreprocessor(df, columns_to_convert=['model', 'fuel'])
+    df = preprocessor.preprocess_data()
+    print(df)
+
+    prediction = model.predict(df)
+    return prediction[0]
 
 model_name = st.text_input("Modelo")
 year = st.number_input("Año", min_value=1900, max_value=2022, step=1)
 milage = st.number_input("Millaje", min_value=0, step=1)
 fuel = st.text_input("Tipo Gasolina")
 
-
 if st.button('Predict'):
-    data = {'model': [model_name],
-        'year': [year],
-        'mileage': [milage],
-        'fuel': [fuel]}
-    df = pd.DataFrame(data)
-    
-    
-    preprocessor = InputPreprocessor(df, columns_to_convert=['model', 'fuel'])
-    df = preprocessor.preprocess_data()
-    
-    
-    prediction = model.predict(df)
-    
-   
-    st.write(f'Predicted Price: {prediction[0]}')
+    predicted_price = predict_price(model_name, year, milage, fuel)
+    st.write(f'Predicted Price: {predicted_price}')

@@ -66,9 +66,12 @@ class ModelTrainerRegression:
             'rf': {
                 'classifier__n_estimators': [10, 50, 100],
                 'classifier__max_depth': [None, 10, 20],
+                'classifier__min_samples_split': [2, 5, 10]	
             }
         }
 
         best_model = self.train_models(pipelines, param_grids)
+        print(X.columns, y.name)
+        print(best_model.best_params_)
 
         self.serialize_model(best_model)
