@@ -1,9 +1,9 @@
-from joblib import load
+import joblib
 import streamlit as st
 import pandas as pd
 from preprocessing import InputPreprocessor
 
-model = load('model.joblib')
+model = joblib.load('model.joblib')
 
 def predict_price(model_name, year, milage, fuel):
     data = {'model': [model_name],
@@ -16,8 +16,15 @@ def predict_price(model_name, year, milage, fuel):
     df = preprocessor.preprocess_data()
     print(df)
 
+    # Check number of features
+    if df.shape[1] != model.n_features_in_:
+        raise ValueError(
+            f"Input data has {df.shape[1]} features, but model expects {model.n_features_in_} features")
+
+    # Make prediction
     prediction = model.predict(df)
     return prediction[0]
+
 
 model_name = st.text_input("Modelo")
 year = st.number_input("Año", min_value=1900, max_value=2022, step=1)
