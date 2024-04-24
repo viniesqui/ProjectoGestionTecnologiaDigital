@@ -24,10 +24,11 @@ class DataPreprocessor:
         for column in columns:
             self.df[column] = le.fit_transform(self.df[column])
 
-    def preprocess_data(self, data):
-        numeric_features = data.select_dtypes(
+    def preprocess_data(self):
+        numeric_features = self.df.select_dtypes(
             include=['int64', 'float64']).columns
-        categorical_features = data.select_dtypes(include=['object']).columns
+        categorical_features = self.df.select_dtypes(
+            include=['object']).columns
 
         numeric_transformer = Pipeline(steps=[
             ('scaler', StandardScaler())
@@ -43,9 +44,9 @@ class DataPreprocessor:
                 ('cat', categorical_transformer, categorical_features)
             ])
 
-        return preprocessor.fit_transform(data)
-    def save_preprocessed_data(self, filepath):
-        self.df.to_csv(filepath, index=False)
+        preprocessed_data = preprocessor.fit_transform(self.df)
+
+        return preprocessed_data
         
         
 class InputPreprocessor:
@@ -59,22 +60,21 @@ class InputPreprocessor:
             self.df[column] = le.fit_transform(self.df[column])
 
     def preprocess_data(self):
-        numeric_features = self.df.select_dtypes(
-            include=['int64', 'float64']).columns
-        categorical_features = self.df.select_dtypes(include=['object']).columns
+        numeric_features = self.df.columns  # Treat all features as numeric
+
+        print(f"Original numeric features: {numeric_features}")
 
         numeric_transformer = Pipeline(steps=[
             ('scaler', StandardScaler())
         ])
 
-        categorical_transformer = Pipeline(steps=[
-            ('encoder', OrdinalEncoder())
-        ])
-
         preprocessor = ColumnTransformer(
             transformers=[
-                ('num', numeric_transformer, numeric_features),
-                ('cat', categorical_transformer, categorical_features)
+                ('num', numeric_transformer, numeric_features)
             ])
 
-        return preprocessor.fit_transform(self.df)
+        preprocessed_data = preprocessor.fit_transform(self.df)
+
+        print(f"Preprocessed data shape: {preprocessed_data.shape}")
+
+        return preprocessed_data
