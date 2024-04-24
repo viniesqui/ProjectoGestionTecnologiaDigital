@@ -5,8 +5,10 @@ from joblib import load
 import numpy as np
 
 class Car(BaseModel):
-    age: int
+    year: int
     mileage: int
+    model: None
+    fuel: None
 
 app = FastAPI()
 
