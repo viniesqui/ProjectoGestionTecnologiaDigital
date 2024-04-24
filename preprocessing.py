@@ -17,9 +17,9 @@ class DataPreprocessor:
         for column in columns:
             self.df[column] = le.fit_transform(self.df[column])
 
-    def preprocess_data(self):
-        numeric_features = self.df.select_dtypes(include=['int64', 'float64']).columns
-        categorical_features = self.df.select_dtypes(include=['object']).columns
+    def preprocess_data(self, data):
+        numeric_features = data.select_dtypes(include=['int64', 'float64']).columns
+        categorical_features = data.select_dtypes(include=['object']).columns
 
         numeric_transformer = Pipeline(steps=[
             ('scaler', StandardScaler())
@@ -35,4 +35,4 @@ class DataPreprocessor:
                 ('cat', categorical_transformer, categorical_features)
             ])
         
-        return preprocessor.fit_transform(self.df)
+        return preprocessor.fit_transform(data)
