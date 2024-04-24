@@ -3,7 +3,7 @@ import streamlit as st
 import pandas as pd
 from preprocessing import InputPreprocessor
 
-model = load('model.joblib')
+model = load('preprocessor.joblib')
 
 
 model_name = st.text_input("Modelo")
