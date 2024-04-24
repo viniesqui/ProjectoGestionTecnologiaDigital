@@ -9,12 +9,15 @@ from preprocessing import DataPreprocessor
 from sklearn.model_selection import GridSearchCV
 
 class ModelTrainerRegression:
-    def __init__(self, data_filepath, target_column, model_filepath):
-        self.data_filepath = data_filepath
-        self.target_column = target_column
-        self.model_filepath = model_filepath
-        self.preprocessor = DataPreprocessor(data_filepath)
-
+    class ModelTrainerRegression:
+        def __init__(self, data_filepath, target_column, columns_to_remove, columns_to_convert, model_filepath='model.joblib'):
+            self.data_filepath = data_filepath
+            self.target_column = target_column
+            self.model_filepath = model_filepath
+            self.columns_to_remove = columns_to_remove
+            self.columns_to_convert = columns_to_convert
+            self.preprocessor = DataPreprocessor(data_filepath, columns_to_remove=self.columns_to_remove, columns_to_convert=self.columns_to_convert)
+    
     def train_models(self, pipelines, param_grids):
         best_mse = float('inf')
         best_pipeline = None
