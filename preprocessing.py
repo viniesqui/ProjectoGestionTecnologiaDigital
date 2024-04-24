@@ -55,12 +55,12 @@ class InputPreprocessor:
         self.transform_columns_to_numeric(columns_to_convert)
 
     def transform_columns_to_numeric(self, columns):
-        le = CustomLabelEncoder()
         for column in columns:
+            le = LabelEncoder()  # Create a new LabelEncoder instance for each column
             self.df[column] = le.fit_transform(self.df[column])
 
     def preprocess_data(self):
-        numeric_features = self.df.columns  # Treat all features as numeric
+        numeric_features = self.df.columns  # todo como numerico porque estaba dando errores
 
         print(f"Original numeric features: {numeric_features}")
 
