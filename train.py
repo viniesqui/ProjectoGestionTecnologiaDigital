@@ -1,7 +1,10 @@
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.svm import SVR
 from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.feature_selection import SelectKBest, f_regression
 from sklearn.metrics import mean_squared_error
 from joblib import dump, load
 from preprocessing import DataPreprocessor
@@ -51,18 +54,25 @@ class ModelTrainerRegression:
         self.split_data()
 
         pipelines = {
-            'lr': Pipeline(steps=[('classifier', LinearRegression())]),
-            'rf': Pipeline(steps=[('classifier', RandomForestRegressor())])
+            'lr': Pipeline(steps=[('scaler', StandardScaler()), ('selector', SelectKBest(score_func=f_regression)), ('classifier', LinearRegression())]),
+            'rf': Pipeline(steps=[('scaler', StandardScaler()), ('selector', SelectKBest(score_func=f_regression)), ('classifier', RandomForestRegressor())]),
+            'svr': Pipeline(steps=[('scaler', StandardScaler()), ('selector', SelectKBest(score_func=f_regression)), ('classifier', SVR())])
         }
 
         param_grids = {
             'lr': {
-                # No hyperparameters
+                'selector__k': [10, 20, self.X.shape[1]]
             },
             'rf': {
+                'selector__k': [10, 20, self.X.shape[1]],
                 'classifier__n_estimators': [10, 50, 100],
                 'classifier__max_depth': [None, 10, 20],
                 'classifier__min_samples_split': [2, 5, 10]	
+            },
+            'svr': {
+                'selector__k': [10, 20, self.X.shape[1]],
+                'classifier__C': [0.1, 1, 10],
+                'classifier__gamma': ['scale', 'auto']
             }
         }
 
@@ -71,13 +81,3 @@ class ModelTrainerRegression:
         print(best_model.best_params_)
 
         self.serialize_model(best_model)
-
-if __name__ == "__main__":
-    trainer = ModelTrainerRegression(
-        'preprocessed_data.csv', 
-        'price', 
-        ['Unnamed: 0', 'mark', 'generation_name', 'city', 'province', 'vol_engine'],
-        ['fuel', 'model'], 
-        'model.joblib'
-    )
-    trainer.run()
