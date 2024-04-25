@@ -8,6 +8,15 @@ class ReadCsv:
 
     def read_data(self):
         return pd.read_csv(self.data_filepath)
+    
+    def preprocess_and_save_data(self, output_filepath, columns_to_remove, columns_to_convert):
+        df = self.read_data()
+
+        preprocessor = DataPreprocessor(df, columns_to_remove, columns_to_convert)
+        preprocessed_data = preprocessor.get_data()
+
+        preprocessed_data.to_csv(output_filepath, index=False)
+        return preprocessor.get_encoders()
 
 class DataPreprocessor:
     def __init__(self, data, columns_to_remove=[], columns_to_convert=[]):
@@ -30,3 +39,5 @@ class DataPreprocessor:
 
     def get_encoders(self):
         return self.encoders
+    
+    
