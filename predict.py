@@ -2,11 +2,11 @@ from joblib import load
 import pandas as pd
 
 class ModelPredictor:
-    def __init__(self, model_filepath):
-        self.model_filepath = model_filepath
+    def __init__(self, model):
+        self.model = model
 
     def load_model(self):
-        self.model = load(self.model_filepath)
+        self.model = load(self.model)
 
     def predict(self, input_data):
         if isinstance(input_data, pd.DataFrame):
