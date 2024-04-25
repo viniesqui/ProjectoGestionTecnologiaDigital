@@ -4,7 +4,7 @@ from preprocessing import DataPreprocessor, ReadCsv
 if __name__ == "__main__":
     
     change_data = ReadCsv('Car_Prices_Poland_Kaggle.csv').preprocess_and_save_data('preprocessed_data.csv', [
-        'Unnamed: 0','mark', 'vol_engine', 'generation_name', 'fuel', 'city', 'province'], ['year', 'model'])
+        'Unnamed: 0', 'mark', 'vol_engine', 'generation_name', 'city', 'province'], ['fuel', 'model'])
    
     nueva_data = ReadCsv('preprocessed_data.csv').read_data()
     
