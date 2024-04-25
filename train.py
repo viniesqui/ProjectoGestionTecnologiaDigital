@@ -29,37 +29,6 @@ class ModelTrainerRegression:
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
             self.X, self.y, test_size=0.2, random_state=42)
 
-    def train_models(self, pipelines, param_grids):
-        best_mse = float('inf')
-        best_pipeline = None
-
-        for name, pipeline in pipelines.items():
-            model = GridSearchCV(pipeline, param_grids[name], cv=3, n_jobs=-1)  
-            
-            # solo 25000 datos al azar porque el dataset es muy grande
-            sampled_X_train = self.X_train.sample(n=25000, random_state=42)
-            sampled_y_train = self.y_train.loc[sampled_X_train.index]
-            
-            model.fit(sampled_X_train, sampled_y_train) 
-            
-            predictions = model.predict(self.X_test)
-            mse = mean_squared_error(self.y_test, predictions)
-            print(f"{name} MSE: {mse}")
-
-            if mse < best_mse:
-                best_mse = mse
-                best_pipeline = model
-
-        return best_pipeline
-
-    def serialize_model(self, model):
-        dump(model, self.model_filepath)
-
-    def load_and_split_data(self):
-        self.load_data()
-        self.split_data()
-        self.feature_names = self.X_train.columns  # Save the feature names
-
     def create_pipelines_and_param_grids(self):
         self.pipelines = {
             'lr': Pipeline(steps=[('scaler', StandardScaler()), ('selector', SelectKBest(score_func=f_regression)), ('classifier', LinearRegression())]),
@@ -69,9 +38,18 @@ class ModelTrainerRegression:
 
         self.param_grids = {
             'lr': {
-                'selector__k': [1, 2, 3, 4]  # Adjusted k values
+                'selector__k': [1]  
             },
-            # ...
+            'rf': {
+                'selector__k': [1, 2, 3, 4],  
+                'classifier__n_estimators': [10, 50, 100],  
+                'classifier__max_features': ['auto', 'sqrt']  
+            },
+            'svr': {
+                'selector__k': [1, 2, 3, 4], 
+                'classifier__C': [0.1, 1, 10], 
+                'classifier__gamma': ['scale', 'auto'] 
+            }
         }
 
     def fit_and_predict(self):
@@ -79,15 +57,9 @@ class ModelTrainerRegression:
         best_pipeline = None
 
         for name, pipeline in self.pipelines.items():
-            model = GridSearchCV(pipeline, self.param_grids[name], cv=3, n_jobs=-1)  # Reduced number of folds
+            model = GridSearchCV(pipeline, self.param_grids[name], cv=3, n_jobs=-1)  
 
-            # Ensure the data has the same feature names before fitting the model
-            self.X_train.columns = self.feature_names
-
-            model.fit(self.X_train, self.y_train)  # Use the sampled data for training
-
-            # Ensure the data has the same feature names before making predictions
-            self.X_test.columns = self.feature_names
+            model.fit(self.X_train, self.y_train)  
 
             predictions = model.predict(self.X_test)
             mse = mean_squared_error(self.y_test, predictions)
@@ -97,7 +69,16 @@ class ModelTrainerRegression:
                 best_mse = mse
                 best_pipeline = model
 
+        return best_pipeline  
+
+    def serialize_model(self, model):
+        dump(model, self.model_filepath)
+
     def run(self):
-        self.load_and_split_data()
+        self.load_data()
+        self.split_data()
         self.create_pipelines_and_param_grids()
-        self.fit_and_predict()
+        best_model = self.fit_and_predict()  
+        self.serialize_model(best_model)  
+        
+        
