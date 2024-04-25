@@ -50,19 +50,30 @@ class DataPreprocessor:
         
         
 class InputPreprocessor:
-    def __init__(self, data, columns_to_convert=[]):
+    def __init__(self, data):
         self.df = data
-        self.transform_columns_to_numeric(columns_to_convert)
 
     def transform_columns_to_numeric(self, columns):
         for column in columns:
-            le = LabelEncoder()  # Create a new LabelEncoder instance for each column
-            self.df[column] = le.fit_transform(self.df[column])
+            self._encode_column(column)
+
+    def _encode_column(self, column):
+        le = LabelEncoder()
+        self.df[column] = le.fit_transform(self.df[column])
 
     def preprocess_data(self):
-        numeric_features = self.df.columns  # todo como numerico porque estaba dando errores
+        numeric_features = self._get_numeric_features()
+        preprocessed_data = self._apply_preprocessing(numeric_features)
+        return preprocessed_data
 
-        print(f"Original numeric features: {numeric_features}")
+    def _get_numeric_features(self):
+        numeric_features = self.df.columns
+        numeric_features = [feature for feature in numeric_features if self.df[feature].nunique() > 1]
+        return numeric_features
+
+    def _apply_preprocessing(self, numeric_features):
+        if not numeric_features:
+            return self.df
 
         numeric_transformer = Pipeline(steps=[
             ('scaler', StandardScaler())
@@ -74,7 +85,4 @@ class InputPreprocessor:
             ])
 
         preprocessed_data = preprocessor.fit_transform(self.df)
-
-        print(f"Preprocessed data shape: {preprocessed_data.shape}")
-
         return preprocessed_data
