@@ -17,9 +17,11 @@ def predict_price(model, model_name, year, milage, fuel):
             'mileage': [milage],
             'fuel': [fuel]}
     df = pd.DataFrame(data)
+    print(df, "asi entra")
     preprocessor = InputPreprocessor(df)
     preprocessor.transform_columns_to_numeric(['model', 'fuel'])
     preprocessed_data = preprocessor.preprocess_data()
+    print(preprocessed_data, "asi sale")
 
     # Check number of features
     if preprocessed_data.shape[1] != model.n_features_in_:
@@ -31,5 +33,5 @@ def predict_price(model, model_name, year, milage, fuel):
     return prediction[0]
 
 if st.button('Predict'):
-    predicted_price = predict_price(model_name, year, milage, fuel)
+    predicted_price = predict_price(model, model_name, year, milage, fuel)
     st.write(f'Predicted Price: {predicted_price}')
