@@ -22,10 +22,10 @@ input_data = pd.DataFrame({
 })
 
 # Create a new ModelPredictor instance
-predictor = ModelPredictor(model)
+predictor = ModelPredictor(model, input_data, columns_to_remove=[], columns_to_convert=["model", "fuel"])
 
 # Use the predictor to make a prediction
-prediccion = predictor.predict(input_data)
+prediccion = predictor.predict()
 
 
 st.write(f"El precio estimado es: {prediccion[0]}")
