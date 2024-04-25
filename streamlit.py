@@ -3,9 +3,7 @@ import joblib
 import pandas as pd
 from predict import ModelPredictor
 
-# cargar el modelo
 model = joblib.load('model.joblib')
-
 
 #hacerle los inputs
 model_name = st.text_input("Modelo")
@@ -21,11 +19,21 @@ input_data = pd.DataFrame({
     'fuel': [fuel]
 })
 
-# Create a new ModelPredictor instance
-predictor = ModelPredictor(model, input_data, columns_to_remove=[], columns_to_convert=["model", "fuel"])
 
-# Use the predictor to make a prediction
-prediccion = predictor.predict()
+if st.button('Predict'):
+    # crear dataframe
+    input_data = pd.DataFrame({
+        'model': [model_name],
+        'year': [year],
+        'mileage': [milage],
+        'fuel': [fuel]
+    })
 
+    # Create a new ModelPredictor instance
+    predictor = ModelPredictor(model, input_data, columns_to_remove=[
+    ], columns_to_convert=["model", "fuel"])
 
-st.write(f"El precio estimado es: {prediccion[0]}")
+    # Use the predictor to make a prediction
+    prediccion = predictor.predict()
+
+    st.write(f"El precio estimado es: {prediccion[0]}")
