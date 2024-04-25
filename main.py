@@ -1,15 +1,17 @@
 from train import ModelTrainerRegression
-
-def main():
+from preprocessing import DataPreprocessor, ReadCsv
+    
+if __name__ == "__main__":
+    
+    change_data = ReadCsv('Car_Prices_Poland_Kaggle.csv').preprocess_and_save_data('preprocessed_data.csv', [
+        'Unnamed: 0','mark', 'vol_engine', 'generation_name', 'fuel', 'city', 'province'], ['year', 'model'])
+   
+    nueva_data = ReadCsv('preprocessed_data.csv').read_data()
+    
     trainer = ModelTrainerRegression(
-        'Car_Prices_Poland_Kaggle.csv', 
-        'price', 
-        ['Unnamed: 0', 'mark', 'generation_name', 'city', 'province', 'vol_engine'],
-        ['fuel', 'model'], 
+        nueva_data,
+        'price',
         'model.joblib'
     )
-    trainer.preprocessor.save_preprocessed_data('preprocessed_data.csv')  # Nuevo csv con datos preprocesados
     trainer.run()
-
-if __name__ == "__main__":
-    main()
+# , mark,model,generation_name,year,mileage,vol_engine,fuel,city,province,price
