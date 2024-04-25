@@ -5,8 +5,11 @@ from preprocessing import DataPreprocessor
 class ModelPredictor:
     def __init__(self, model, data, columns_to_remove=[], columns_to_convert=[]):
         self.model = model
+        self.data = data
+        self.columns_to_remove = columns_to_remove
+        self.columns_to_convert = columns_to_convert
         self.preprocessor = DataPreprocessor(
-            data, columns_to_remove=[], columns_to_convert=[])
+            self.data, self.columns_to_remove, self.columns_to_convert)
 
     def load_model(self):
         self.model = load(self.model)
