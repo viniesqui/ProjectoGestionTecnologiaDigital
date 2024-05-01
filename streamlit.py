@@ -6,10 +6,10 @@ from predict import ModelPredictor
 model = joblib.load('model.joblib')
 
 #hacerle los inputs
-model_name = st.text_input("Modelo")
+model_name = st.text_input("Modelo (en minuscula)")
 year = st.number_input("Año", min_value=1900, max_value=2022, step=1)
 milage = st.number_input("Millaje", min_value=0, step=1)
-fuel = st.text_input("Tipo Gasolina")
+fuel = st.text_input("Tipo Gasolina(Diesel o Gasoline)")
 
 # crear dataframe
 input_data = pd.DataFrame({
@@ -36,4 +36,4 @@ if st.button('Predict'):
     # Use the predictor to make a prediction
     prediccion = predictor.predict()
 
-    st.write(f"El precio estimado es: {prediccion[0]}")
+    st.write(f"El precio estimado es: {prediccion[0]}, en Zloty (moneda polonia)")
