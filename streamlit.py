@@ -45,12 +45,11 @@ if st.button('Predict'):
 
 # aca va la parte de la segunda version que es poder meter datos, la idea a futuro es que sirva como un 
 #sistema de inventario para una empresa de carros
-
 # Define the URL of your FastAPI application
 url = 'http://localhost:8000/add_data/'
 
 # Load the encoders
-columns_to_convert = ['model', 'fuel']  # replace with your actual columns
+columns_to_convert = ['model', 'fuel'] 
 encoders = {column: load(f'{column}_encoder.joblib') for column in columns_to_convert}
 
 # Create a form to get the user's input
@@ -62,14 +61,27 @@ with st.form(key='my_form'):
     submit_button = st.form_submit_button(label='Submit')
 
 # When the user clicks the submit button, transform the data and send a POST request to the FastAPI
+import pandas as pd
+
 if submit_button:
-    data = {'model': model, 'year': year, 'mileage': mileage, 'fuel': fuel}
+    # Create a DataFrame from the input data
+    input_data = pd.DataFrame({
+        'model': [model],
+        'year': [year],
+        'mileage': [mileage],
+        'fuel': [fuel]
+    })
 
-    # Transform the data using the encoders
-    for column in columns_to_convert:
-        data[column] = encoders[column].transform([data[column]])[0]
+    # Create a new ModelPredictor instance
+    predictor = ModelPredictor(None, input_data, columns_to_convert=columns_to_convert)
 
-    response = requests.post(url, data=json.dumps(data))
+    # Use the predictor to transform the data
+    transformed_data = predictor.transform_data()
+
+    # Convert the transformed data to a dictionary and then to a JSON string
+    json_data = json.dumps(transformed_data.to_dict(orient='records')[0])
+
+    response = requests.post(url, data=json_data)
     if response.status_code == 200:
         st.write('Data successfully added and model retrained if necessary.')
     else:
