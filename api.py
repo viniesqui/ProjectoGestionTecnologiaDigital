@@ -1,35 +1,28 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 from pydantic import BaseModel
-from sklearn.ensemble import RandomForestRegressor
-from joblib import load
-import numpy as np
-
-class Car(BaseModel):
-    year: int
-    mileage: int
-    model: None
-    fuel: None
+import pandas as pd
+from train import ModelTrainerRegression
 
 app = FastAPI()
 
-class Model:
-    def __init__(self):
-        self.model = load('model.joblib')
+class Item(BaseModel):
+    model: str
+    year: int
+    mileage: int
+    fuel: str
 
-    def predict(self, data):
-        return self.model.predict(data)
+@app.post("/add_data/")
+async def add_data(item: Item):
+    data = item.dict()
+    df = pd.read_csv('preprocessed_data.csv')
+    df = df.append(data, ignore_index=True)
+    df.to_csv('preprocessed_data.csv', index=False)
+    if len(df) % 100 == 0:
+        retrain_model(df)
+    return {"message": "Data added and model retrained if necessary"}
 
-def get_model():
-    model = Model()
-    return model
-
-@app.on_event("startup")
-def load_model():
-    global model
-    model = get_model()
-
-@app.post("/predict")
-def predict_price(car: Car, model: Model = Depends(get_model)):
-    data = np.array([list(car.dict().values())])
-    prediction = model.predict(data)
-    return {"predicted_price": prediction[0]}
+def retrain_model(df):
+    target_column = 'price'  
+    model_filepath = 'model.joblib' 
+    trainer = ModelTrainerRegression(df, target_column, model_filepath)
+    trainer.run()
