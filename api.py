@@ -13,7 +13,7 @@ class Item(BaseModel):
 
 @app.post("/add_data/")
 async def add_data(item: Item):
-    data = item.dict()
+    data = item.model_dump()
     df = pd.read_csv('preprocessed_data.csv')
     df = df.append(data, ignore_index=True)
     df.to_csv('preprocessed_data.csv', index=False)
