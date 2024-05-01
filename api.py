@@ -6,9 +6,9 @@ from train import ModelTrainerRegression
 app = FastAPI()
 
 class Item(BaseModel):
-    model: str
+    model: int
     year: int
-    mileage: int
+    mileage: float
     fuel: str
 
 @app.post("/add_data/")

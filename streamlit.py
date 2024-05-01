@@ -2,6 +2,9 @@ import streamlit as st
 import joblib
 import pandas as pd
 from predict import ModelPredictor
+import requests
+import json
+from joblib import load
 
 model = joblib.load('model.joblib')
 
@@ -37,3 +40,37 @@ if st.button('Predict'):
     prediccion = predictor.predict()
 
     st.write(f"El precio estimado es: {prediccion[0]}, en Zloty (moneda polonia)")
+
+
+
+# aca va la parte de la segunda version que es poder meter datos, la idea a futuro es que sirva como un 
+#sistema de inventario para una empresa de carros
+
+# Define the URL of your FastAPI application
+url = 'http://localhost:8000/add_data/'
+
+# Load the encoders
+columns_to_convert = ['model', 'fuel']  # replace with your actual columns
+encoders = {column: load(f'{column}_encoder.joblib') for column in columns_to_convert}
+
+# Create a form to get the user's input
+with st.form(key='my_form'):
+    model = st.text_input(label='Enter model')
+    year = st.number_input(label='Enter year', format='%d')
+    mileage = st.number_input(label='Enter mileage', format='%d')
+    fuel = st.text_input(label='Enter fuel')
+    submit_button = st.form_submit_button(label='Submit')
+
+# When the user clicks the submit button, transform the data and send a POST request to the FastAPI
+if submit_button:
+    data = {'model': model, 'year': year, 'mileage': mileage, 'fuel': fuel}
+
+    # Transform the data using the encoders
+    for column in columns_to_convert:
+        data[column] = encoders[column].transform([data[column]])[0]
+
+    response = requests.post(url, data=json.dumps(data))
+    if response.status_code == 200:
+        st.write('Data successfully added and model retrained if necessary.')
+    else:
+        st.write('An error occurred.')
